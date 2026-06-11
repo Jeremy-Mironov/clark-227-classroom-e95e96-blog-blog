@@ -41,6 +41,15 @@ if (!$post_id) {
         $stmt_category->execute(["post_id" => $post->post_id]);
         $categories = $stmt_category->fetchAll();
 
+        $sql_tags = "SELECT post_tag.post_id, post_tag.tag_id, tag.tag
+        FROM post_tag
+        JOIN tag ON post_tag.tag_id = tag.id
+        WHERE post_tag.post_id = :post_id";
+
+        $stmt_tags = $db->prepare($sql_tags);
+        $stmt_tags->execute(["post_id" => $post->post_id]);
+        $tags = $stmt_tags->fetchAll();
+
         echo "<div class='col-12 col-lg-8 offset-lg-2'>";
         echo "<div class='card shadow-sm'>";
         echo "<div class='card-body p-4 p-md-5'>";
@@ -49,9 +58,19 @@ if (!$post_id) {
         echo "<p class='text-muted small'><a href='author.php?id={$post->author_id}' class='text-decoration-none'>" . h($post->first_name) . " " . h($post->last_name) . "</a> &mdash; " . $date->format('M d, Y') . "</p>";
 
         if (count($categories) > 0) {
-            echo "<div class='d-flex flex-wrap gap-1 mb-3'>";
+            echo "<div class='d-flex flex-wrap gap-2 mb-2'>";
+            echo "<span class='text-muted'>Categories:</span>";
             foreach ($categories as $cat) {
-                echo "<a href='category.php?id={$cat->category_id}' class='badge rounded-pill bg-secondary text-decoration-none'>" . h($cat->category) . "</a>";
+                echo "<a href='category.php?id={$cat->category_id}' class='text-decoration-none text-primary'>Category - " . h($cat->category) . "</a>";
+            }
+            echo "</div>";
+        }
+
+        if (count($tags) > 0) {
+            echo "<div class='d-flex flex-wrap gap-2 mb-3'>";
+            echo "<span class='text-muted'>Tags:</span>";
+            foreach ($tags as $tag) {
+                echo "<span class='badge rounded-pill bg-dark'>" . h($tag->tag) . "</span>";
             }
             echo "</div>";
         }
@@ -71,9 +90,7 @@ if (!$post_id) {
 </div>
 </main>
 
-<footer class="bg-dark text-white-50 text-center py-4 mt-5">
-    <div class="container"><small>&copy; <?= date('Y') ?> CTEC 227 Blog</small></div>
-</footer>
+<?php require "inc/footer.inc.php"; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
 </body>

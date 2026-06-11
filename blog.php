@@ -12,7 +12,8 @@
 <!-- Include the Bootstrap Navbar -->
 <?php 
     require "inc/db_connect.inc.php"; // connect to the blog database
-    require "inc/navbar.inc.php" 
+    require "inc/navbar.inc.php";
+    require "inc/post_card.inc.php";
 ?>
 
 <main class="container py-5">
@@ -105,34 +106,7 @@ if(count($data) === 0){
     }
 } else {
     foreach($data as $row){
-        $date = date_create($row->date);
-        
-        $sql_cats = "SELECT post_category.post_id, post_category.category_id, category.category 
-        FROM post_category 
-        JOIN category ON post_category.category_id = category.category_id 
-        WHERE post_category.post_id = :post_id";
-        
-        $stmt_category = $db->prepare($sql_cats);
-        $stmt_category->execute(["post_id" => $row->post_id]);
-        $categories = $stmt_category->fetchAll();
-        
-        echo "<div class='card shadow-sm mb-4'>";
-        echo "<div class='card-body p-4'>";
-        echo "<h2 class='h5 fw-bold mb-1'><a href='post.php?id={$row->post_id}' class='text-dark text-decoration-none'>" . h($row->title) . "</a></h2>";
-        echo "<p class='text-muted small mb-2'><a href='author.php?id={$row->author_id}' class='text-decoration-none'>" . h($row->first_name) . " " . h($row->last_name) . "</a> &mdash; " . $date->format('M d, Y')  . "</p>";
-        
-        if(count($categories) > 0){
-            echo "<div class='d-flex flex-wrap gap-1 mb-3'>";
-            foreach($categories as $category_row){
-                echo "<a href='category.php?id={$category_row->category_id}' class='badge rounded-pill bg-secondary text-decoration-none'>" . h($category_row->category) . "</a>";
-            }
-            echo "</div>";
-        }
-        
-        echo "<p class='text-muted mb-3'>" . h($row->content) . "</p>";
-        echo "<a href='post.php?id={$row->post_id}' class='btn btn-dark btn-sm'>Read more &rsaquo;</a>";
-        echo "</div>";
-        echo "</div>";
+        render_post_card($row, $db);
     }
     
     // Pagination
@@ -177,9 +151,7 @@ if(count($data) === 0){
 </div> <!-- Closing for .row -->
 </main>
 
-<footer class="bg-dark text-white-50 text-center py-4 mt-5">
-    <div class="container"><small>&copy; <?= date('Y') ?> CTEC 227 Blog</small></div>
-</footer>
+<?php require "inc/footer.inc.php"; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
 </body>
